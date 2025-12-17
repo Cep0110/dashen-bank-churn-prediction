@@ -3,7 +3,7 @@ import pandas as pd
 import joblib
 
 # Load pipeline (preprocessing + model)
-pipeline = joblib.load("churn_pipeline.pkl")
+pipeline = joblib.load("churn_model.pkl")
 
 st.set_page_config(page_title="Dashen Bank Churn Predictor", layout="centered")
 
@@ -48,4 +48,5 @@ if st.button("Predict Churn Risk"):
     else:
         st.success("✅ Low Risk of Churn")
         st.write("👉 Maintain customer engagement")
+
  
