@@ -1,4 +1,4 @@
-  import streamlit as st
+import streamlit as st
 import pandas as pd
 import joblib
 
@@ -51,4 +51,5 @@ if st.button("Predict Churn Risk"):
     else:
         st.success("✅ Low Risk of Churn")
         st.write("👉 Maintain customer engagement")
+
 
