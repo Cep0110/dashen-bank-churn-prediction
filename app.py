@@ -1,16 +1,19 @@
-import streamlit as st
+  import streamlit as st
 import pandas as pd
 import joblib
 
-# ---------------- LOAD PIPELINE ----------------
-pipeline = joblib.load("churn_model.pkl")  # this IS your pipeline
+# Load trained pipeline
+pipeline = joblib.load("churn_model.pkl")
+
+# Get expected columns from pipeline
+EXPECTED_COLS = list(pipeline.feature_names_in_)
 
 st.set_page_config(page_title="Dashen Bank Churn Predictor", layout="centered")
 
 st.title("🏦 Dashen Bank Customer Churn Predictor")
 st.write("Predict whether a customer is likely to leave the bank.")
 
-# ---------------- USER INPUTS (RAW) ----------------
+# -------- Inputs --------
 gender = st.selectbox("Gender", ["Male", "Female"])
 age = st.slider("Age", 18, 80, 35)
 region = st.selectbox("Region", ["Addis Ababa", "Oromia", "Amhara", "Tigray", "SNNPR"])
@@ -23,26 +26,33 @@ active_member = st.selectbox("Is Active Member?", ["Yes", "No"])
 balance = st.number_input("Account Balance (ETB)", min_value=0.0, value=5000.0)
 monthly_fee = st.number_input("Monthly Service Fee (ETB)", min_value=0.0, value=50.0)
 
-# ---------------- INPUT DATAFRAME (MUST MATCH TRAINING) ----------------
-input_df = pd.DataFrame({
-    "Gender": [gender],
-    "Age": [age],
-    "Region": [region],
-    "HasPartner": [has_partner],
-    "TenureYears": [tenure],
-    "AccountType": [account_type],
-    "HasMobileBanking": [mobile_banking],
-    "HasCreditCard": [credit_card],
-    "IsActiveMember": [active_member],
-    "Balance_ETB": [balance],
-    "MonthlyServiceFee_ETB": [monthly_fee]
-})
+# -------- Build FULL input row --------
+input_data = {
+    "Gender": gender,
+    "Age": age,
+    "Region": region,
+    "HasPartner": has_partner,
+    "TenureYears": tenure,
+    "AccountType": account_type,
+    "HasMobileBanking": mobile_banking,
+    "HasCreditCard": credit_card,
+    "IsActiveMember": active_member,
+    "Balance_ETB": balance,
+    "MonthlyServiceFee_ETB": monthly_fee
+}
 
-# ---------------- PREDICTION ----------------
+# If CustomerID was used during training, add dummy value
+if "CustomerID" in EXPECTED_COLS:
+    input_data["CustomerID"] = 0
+
+# Create DataFrame with EXACT expected columns
+input_df = pd.DataFrame([[input_data.get(col, None) for col in EXPECTED_COLS]],
+                        columns=EXPECTED_COLS)
+
+# -------- Prediction --------
 if st.button("Predict Churn Risk"):
     prob = pipeline.predict_proba(input_df)[0][1]
 
-    st.subheader("🔍 Prediction Result")
     st.metric("Churn Probability", f"{prob:.2%}")
 
     if prob >= 0.6:
@@ -51,5 +61,4 @@ if st.button("Predict Churn Risk"):
     else:
         st.success("✅ Low Risk of Churn")
         st.write("👉 Maintain customer engagement")
-
 
