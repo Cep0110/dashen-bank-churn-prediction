@@ -1,16 +1,16 @@
-import streamlit as st
+  import streamlit as st
 import pandas as pd
 import joblib
 
-# Load pipeline (preprocessing + model)
-pipeline = joblib.load("churn_model.pkl")
+# ---------------- LOAD PIPELINE ----------------
+pipeline = joblib.load("churn_model.pkl")  # this IS your pipeline
 
 st.set_page_config(page_title="Dashen Bank Churn Predictor", layout="centered")
 
 st.title("🏦 Dashen Bank Customer Churn Predictor")
 st.write("Predict whether a customer is likely to leave the bank.")
 
-# -------- Inputs --------
+# ---------------- USER INPUTS (RAW) ----------------
 gender = st.selectbox("Gender", ["Male", "Female"])
 age = st.slider("Age", 18, 80, 35)
 region = st.selectbox("Region", ["Addis Ababa", "Oromia", "Amhara", "Tigray", "SNNPR"])
@@ -23,6 +23,7 @@ active_member = st.selectbox("Is Active Member?", ["Yes", "No"])
 balance = st.number_input("Account Balance (ETB)", min_value=0.0, value=5000.0)
 monthly_fee = st.number_input("Monthly Service Fee (ETB)", min_value=0.0, value=50.0)
 
+# ---------------- INPUT DATAFRAME (MUST MATCH TRAINING) ----------------
 input_df = pd.DataFrame({
     "Gender": [gender],
     "Age": [age],
@@ -37,9 +38,11 @@ input_df = pd.DataFrame({
     "MonthlyServiceFee_ETB": [monthly_fee]
 })
 
+# ---------------- PREDICTION ----------------
 if st.button("Predict Churn Risk"):
     prob = pipeline.predict_proba(input_df)[0][1]
 
+    st.subheader("🔍 Prediction Result")
     st.metric("Churn Probability", f"{prob:.2%}")
 
     if prob >= 0.6:
@@ -49,4 +52,3 @@ if st.button("Predict Churn Risk"):
         st.success("✅ Low Risk of Churn")
         st.write("👉 Maintain customer engagement")
 
- 
